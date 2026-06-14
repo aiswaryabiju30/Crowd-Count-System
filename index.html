@@ -75,7 +75,7 @@
             formData.append("file", fileInput.files[0]);
             formData.append("threshold", thresholdInput.value);
 
-            var response = await fetch("http://127.0.0.1:8000/predict", {
+            var response = await fetch("http://65.1.93.210:8000/predict", {
                 method: "POST",
                 body: formData
             });
