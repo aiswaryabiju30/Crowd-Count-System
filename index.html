@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Crowd Count System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 400px;
+        }
+        h1 { color: #333; }
+        input[type="file"], input[type="number"] { margin: 15px 0; }
+        input[type="number"] {
+            width: 100px;
+            padding: 5px;
+            font-size: 16px;
+        }
+        label { font-weight: bold; }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover { background-color: #0056b3; }
+        #result { margin-top: 20px; font-size: 18px; }
+        .safe { color: green; font-weight: bold; }
+        .alert { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Crowd Count System</h1>
+        <p>Upload an image to check crowd count</p>
+        <input type="file" id="imageInput" accept="image/*">
+        <br>
+        <label for="thresholdInput">Set Limit:</label>
+        <input type="number" id="thresholdInput" value="5" min="1">
+        <br>
+        <button onclick="checkCrowd()">Check Crowd</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function checkCrowd() {
+            var fileInput = document.getElementById("imageInput");
+            var thresholdInput = document.getElementById("thresholdInput");
+            var resultDiv = document.getElementById("result");
+
+            if (fileInput.files.length === 0) {
+                resultDiv.innerHTML = "Please select an image";
+                return;
+            }
+
+            resultDiv.innerHTML = "Processing...";
+
+            var formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+            formData.append("threshold", thresholdInput.value);
+
+            var response = await fetch("http://127.0.0.1:8000/predict", {
+                method: "POST",
+                body: formData
+            });
+
+            var data = await response.json();
+
+            if (data.alert) {
+                resultDiv.innerHTML = "<p>People Count: " + data.person_count + "</p>" +
+                    "<p class='alert'>ALERT: Threshold Exceeded! (Limit: " + data.threshold + ")</p>";
+            } else {
+                resultDiv.innerHTML = "<p>People Count: " + data.person_count + "</p>" +
+                    "<p class='safe'>Normal (Limit: " + data.threshold + ")</p>";
+            }
+        }
+    </script>
+</body>
+</html>
